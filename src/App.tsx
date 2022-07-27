@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import styled from "styled-components";
@@ -26,7 +27,40 @@ const Submit = styled.button`
   }
 `;
 
-const ResultWrapper = styled.div``;
+const ResultWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 40px 0px;
+`;
+
+const ResultContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 80px;
+`;
+
+const ResultKind = styled.span`
+  margin-right: 20px;
+`;
+
+const ResultImageContent = styled.div`
+  display: flex;
+  width: 600px;
+  flex-direction: column;
+`;
+
+const ResultImage = styled(motion.img)`
+  object-fit: cover;
+`;
+
+const ResultButtonContent = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+`;
+
+const ResultButton = styled.button``;
 
 interface ImageTypes {
   dataURL: string;
@@ -59,7 +93,10 @@ export function App() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
+  const [showing, setShowing] = useState(false);
   const maxNumber = 69;
+
+  const toggleShowing = () => setShowing((prev) => !prev);
 
   const onChange = (
     imageList: ImageListType,
@@ -157,17 +194,25 @@ export function App() {
       ) : predImages?.length > 0 ? (
         <ResultWrapper>
           {predImages.map((data, idx) => (
-            <>
+            <ResultContent>
               <div>
                 {data.kind.map((item) => (
-                  <span>{item} / </span>
+                  <ResultKind>{item}</ResultKind>
                 ))}
               </div>
-              <img
-                src={`data:image/png;base64,${data.imageBytes}`}
-                alt="pred"
-              />
-            </>
+              <ResultImageContent>
+                {showing ? (
+                  <ResultImage
+                    src={`data:image/png;base64,${data.imageBytes}`}
+                    alt="pred"
+                  />
+                ) : null}
+                <ResultButtonContent>
+                  <ResultButton>이전</ResultButton>
+                  <ResultButton>다음</ResultButton>
+                </ResultButtonContent>
+              </ResultImageContent>
+            </ResultContent>
           ))}
         </ResultWrapper>
       ) : (
