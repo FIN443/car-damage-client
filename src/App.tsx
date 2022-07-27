@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import styled from "styled-components";
@@ -29,15 +29,18 @@ const Submit = styled.button`
 
 const ResultWrapper = styled.div`
   display: flex;
-  flex-direction: column;
   justify-content: center;
   margin: 40px 0px;
+  position: relative;
+  height: 60vh;
 `;
 
-const ResultContent = styled.div`
+const ResultContent = styled(motion.div)`
   display: flex;
+  position: absolute;
+  top: 60px;
   flex-direction: column;
-  margin-bottom: 80px;
+  margin-bottom: 10px;
 `;
 
 const ResultKind = styled.span`
@@ -50,7 +53,7 @@ const ResultImageContent = styled.div`
   flex-direction: column;
 `;
 
-const ResultImage = styled(motion.img)`
+const ResultImage = styled.img`
   object-fit: cover;
 `;
 
@@ -58,6 +61,7 @@ const ResultButtonContent = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 4px;
+  margin-bottom: 40px;
 `;
 
 const ResultButton = styled.button``;
@@ -89,14 +93,46 @@ interface DataTypes {
 
 interface PredImageTypes extends Array<DataTypes> {}
 
+const boxVariant = {
+  entry: (isBack: boolean) => ({
+    x: isBack ? -1000 : 1000,
+    opacity: 0,
+    scale: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+    },
+  },
+  exit: (isBack: boolean) => ({
+    x: isBack ? 1000 : -1000,
+    opacity: 0,
+    scale: 0,
+    transition: {
+      duration: 0.8,
+    },
+  }),
+};
+
 export function App() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
-  const [showing, setShowing] = useState(false);
-  const maxNumber = 69;
+  const [visible, setVisible] = useState<number>(1);
+  const [back, setBack] = useState<boolean>(false);
+  const maxNumber = 5;
 
-  const toggleShowing = () => setShowing((prev) => !prev);
+  const getNext = () => {
+    setBack(false);
+    setVisible((prev) => (prev === predImages.length ? 1 : prev + 1));
+  };
+  const getPrev = () => {
+    setBack(true);
+    setVisible((prev) => (prev === 1 ? predImages.length : prev - 1));
+  };
 
   const onChange = (
     imageList: ImageListType,
@@ -193,27 +229,36 @@ export function App() {
         <Loading>제출 중</Loading>
       ) : predImages?.length > 0 ? (
         <ResultWrapper>
-          {predImages.map((data, idx) => (
-            <ResultContent>
-              <div>
-                {data.kind.map((item) => (
-                  <ResultKind>{item}</ResultKind>
-                ))}
-              </div>
-              <ResultImageContent>
-                {showing ? (
-                  <ResultImage
-                    src={`data:image/png;base64,${data.imageBytes}`}
-                    alt="pred"
-                  />
-                ) : null}
-                <ResultButtonContent>
-                  <ResultButton>이전</ResultButton>
-                  <ResultButton>다음</ResultButton>
-                </ResultButtonContent>
-              </ResultImageContent>
-            </ResultContent>
-          ))}
+          <AnimatePresence custom={back}>
+            {predImages.map((data, idx) =>
+              idx + 1 === visible ? (
+                <ResultContent
+                  custom={back}
+                  variants={boxVariant}
+                  initial="entry"
+                  animate="center"
+                  exit="exit"
+                  key={visible}
+                >
+                  <div>
+                    {data.kind.map((item) => (
+                      <ResultKind>{item}</ResultKind>
+                    ))}
+                  </div>
+                  <ResultImageContent>
+                    <ResultImage
+                      src={`data:image/png;base64,${data.imageBytes}`}
+                      alt="pred"
+                    />
+                  </ResultImageContent>
+                </ResultContent>
+              ) : null
+            )}
+          </AnimatePresence>
+          <ResultButtonContent>
+            <ResultButton onClick={getPrev}>이전</ResultButton>
+            <ResultButton onClick={getNext}>다음</ResultButton>
+          </ResultButtonContent>
         </ResultWrapper>
       ) : (
         <></>
