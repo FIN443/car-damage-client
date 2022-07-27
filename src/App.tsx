@@ -42,11 +42,23 @@ interface FileTypes {
   webkitRelativePath: string;
 }
 
+interface ResponseTypes {
+  data: DataTypes[];
+  message: string;
+  ok: boolean;
+}
+
+interface DataTypes {
+  imageBytes: string;
+  kind: string[];
+}
+
+interface PredImageTypes extends Array<DataTypes> {}
+
 export function App() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [result, setResult] = useState<boolean>(false);
-  const [predImages, setPredImages] = useState<any>([]);
+  const [predImages, setPredImages] = useState<PredImageTypes>([]);
   const maxNumber = 69;
 
   const onChange = (
@@ -58,47 +70,43 @@ export function App() {
     setImages(imageList as never[]);
   };
 
-  function handleUpload(event: any) {
+  async function handleUpload(event: any) {
     event.preventDefault();
-    console.log(images.length);
     setLoading(true);
 
     const address = "http://localhost:5555/predict";
-    images.map((image: ImageTypes) => {
-      console.log(image);
-      const imgURL = image.dataURL;
-      setPredImages([...predImages, "newPredImage"]);
-    });
+    let data = new FormData();
+    await Promise.all(
+      images.map(async (image: ImageTypes, idx) => {
+        // console.log(image);
+        const imgURL = image.dataURL;
+        await fetch(imgURL)
+          .then((res) => res.blob())
+          .then((blob) => {
+            data.append(`image${idx}`, blob, `image${idx}.png`);
+          });
+      })
+    );
 
-    // const imgURL = previewCanvasRef.current?.toDataURL("image/png");
-    // const address = "https://font-predict.herokuapp.com/predict";
-    // fetch(imgURL!)
-    //   .then((res) => res.blob())
-    //   .then((blob) => {
-    //     let data = new FormData();
-    //     data.append("image", blob, "image.png");
-    //     // console.log(blob);
-    //     // Upload
-    //     fetch(address, {
-    //       method: "POST",
-    //       body: data,
-    //     })
-    //       .then((res) => {
-    //         if (res.ok) {
-    //           return res.json();
-    //         }
-    //         throw new Error("Network response was not ok.");
-    //       })
-    //       .then((data) => {
-    //         setResult(data!.data);
-    //         setLoading(false);
-    //         setPredict(true);
-    //       })
-    //       .catch((error) => {
-    //         // console.log(`error: ${error}`);
-    //         setLoading(false);
-    //       });
-    //   });
+    fetch(address, {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then((data: ResponseTypes) => {
+        // console.log(data);
+        setPredImages(data.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        // console.log(`error: ${error}`);
+        setLoading(false);
+      });
   }
 
   return (
@@ -146,8 +154,22 @@ export function App() {
       </form>
       {loading ? (
         <Loading>제출 중</Loading>
-      ) : result ? (
-        <ResultWrapper>예측 완료</ResultWrapper>
+      ) : predImages?.length > 0 ? (
+        <ResultWrapper>
+          {predImages.map((data, idx) => (
+            <>
+              <div>
+                {data.kind.map((item) => (
+                  <span>{item} / </span>
+                ))}
+              </div>
+              <img
+                src={`data:image/png;base64,${data.imageBytes}`}
+                alt="pred"
+              />
+            </>
+          ))}
+        </ResultWrapper>
       ) : (
         <></>
       )}
