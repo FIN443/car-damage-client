@@ -3,9 +3,10 @@ import {
   faSquareMinus,
   faArrowAltCircleLeft,
   faArrowAltCircleRight,
+  faCheckCircle,
 } from "@fortawesome/free-regular-svg-icons";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import React, { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import styled from "styled-components";
 import "./styles.css";
@@ -18,12 +19,55 @@ const AppWrapper = styled.div`
   padding: 20px;
 `;
 
+const AddressForm = styled.form`
+  display: flex;
+  width: 800px;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 800px;
+  margin: 20px;
+`;
+
+const Address = styled.input`
+  width: 650px;
+  padding: 14px 20px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: 1px solid;
+`;
+
+const AddressApply = styled.button`
+  width: 70px;
+  height: 100%;
+  background-color: orange;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  transition: background-color 0.12s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    background-color: #ff8000;
+  }
+  &:active {
+    background-color: orangered;
+  }
+`;
+
+const ApplyStatus = styled(FontAwesomeIcon)`
+  color: yellowgreen;
+  font-size: 20px;
+  width: 30px;
+`;
+
 const Loading = styled.div``;
 
 const ImageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 20px;
 `;
 
 const AddButton = styled.button`
@@ -252,6 +296,8 @@ export function App() {
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
   const [visible, setVisible] = useState<number>(1);
   const [back, setBack] = useState<boolean>(false);
+  const [text, setText] = useState("http://localhost:5555/predict");
+  const [address, setAddress] = useState("");
   const maxNumber = 8;
 
   const getNext = () => {
@@ -272,13 +318,22 @@ export function App() {
     setImages(imageList as never[]);
   };
 
-  async function handleUpload(event: any) {
+  const onChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+  };
+
+  function handleAddress(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAddress(text);
+    console.log(address);
+  }
+
+  async function handleUpload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
     else if (images.length < 1) return;
     setLoading(true);
 
-    const address = "http://localhost:5555/predict";
     let data = new FormData();
     await Promise.all(
       images.map(async (image: ImageTypes, idx) => {
@@ -305,6 +360,7 @@ export function App() {
       .then((data: ResponseTypes) => {
         // console.log(data);
         setPredImages(data.data);
+        setVisible(1);
         setLoading(false);
       })
       .catch((error) => {
@@ -318,6 +374,19 @@ export function App() {
         <title>차량 파손 탐지</title>
       </Helmet>
       <AppWrapper className="App">
+        <AddressForm onSubmit={handleAddress}>
+          <Address
+            onChange={onChangeText}
+            value={text}
+            type="text"
+            placeholder="모델 서버 주소"
+          />
+          <AddressApply>적용</AddressApply>
+          <ApplyStatus
+            icon={faCheckCircle}
+            opacity={address === "" ? 0 : 1}
+          ></ApplyStatus>
+        </AddressForm>
         <ImageUploading
           multiple
           value={images}
