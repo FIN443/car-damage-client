@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSquareMinus } from "@fortawesome/free-regular-svg-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -5,34 +7,122 @@ import styled from "styled-components";
 import "./styles.css";
 
 const AppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
 `;
 
 const Loading = styled.div``;
 
-const ImageWrapper = styled.div``;
+const ImageWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const AddButton = styled.button`
+  width: 100%;
+  height: 120px;
+  margin-bottom: 20px;
+  border: 1px dashed rgba(0, 0, 0, 1);
+  border-radius: 12px;
+  box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, 0.1);
+  background-color: #ffcc6eb8;
+  transition: all 0.12s ease-in-out;
+  &:hover {
+    background-color: #ffbf48;
+    color: orangered;
+    cursor: pointer;
+  }
+`;
+
+const RemoveAllButton = styled.button`
+  width: 100%;
+  margin-bottom: 20px;
+  border: none;
+  background-color: #ff6730;
+  border-radius: 8px;
+  color: white;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    background-color: orangered;
+    cursor: pointer;
+  }
+`;
+
+const AddedImageThumb = styled.img`
+  height: 190px;
+  width: 190px;
+  object-fit: cover;
+`;
+
+const RemoveButton = styled(FontAwesomeIcon)`
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  color: #ff5900;
+  transition: color 0.12s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    color: red;
+  }
+`;
+
+const AddedImages = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  width: 800px;
+  background-color: #fff9f3;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 200px;
+  box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.1);
+`;
+const AddedImage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 25%;
+  transition: opacity 0.12s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+  }
+`;
 
 const Submit = styled.button`
   text-align: center;
   margin-top: 20px;
   padding: 15px 4px;
   border: none;
-  background-color: #85cdea;
+  background-color: orange;
+  color: white;
   border-radius: 6px;
-  width: 120px;
+  width: 800px;
   cursor: pointer;
-  transition: background-color 0.1s ease-in-out;
+  transition: background-color 0.12s ease-in-out;
+  margin-bottom: 20px;
   &:hover {
-    background-color: #72b1ca;
+    background-color: orangered;
+  }
+  &:disabled {
+    background-color: gray;
+    cursor: default;
   }
 `;
 
 const ResultWrapper = styled.div`
   display: flex;
   justify-content: center;
-  margin: 40px 0px;
+  margin: 10px 0px;
   position: relative;
-  height: 60vh;
+  min-height: 600px;
 `;
 
 const ResultContent = styled(motion.div)`
@@ -43,8 +133,21 @@ const ResultContent = styled(motion.div)`
   margin-bottom: 10px;
 `;
 
+const ResultKinds = styled.div`
+  display: flex;
+  padding: 8px 10px;
+  border: 1px solid;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+`;
+
 const ResultKind = styled.span`
   margin-right: 20px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background-color: orangered;
+  color: white;
+  box-shadow: 0px 0px 2px 1px rgba(0, 0, 0, 0.2);
 `;
 
 const ResultImageContent = styled.div`
@@ -55,6 +158,7 @@ const ResultImageContent = styled.div`
 
 const ResultImage = styled.img`
   object-fit: cover;
+  border-radius: 0 0 8px 8px;
 `;
 
 const ResultButtonContent = styled.div`
@@ -123,7 +227,7 @@ export function App() {
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
   const [visible, setVisible] = useState<number>(1);
   const [back, setBack] = useState<boolean>(false);
-  const maxNumber = 5;
+  const maxNumber = 8;
 
   const getNext = () => {
     setBack(false);
@@ -145,6 +249,8 @@ export function App() {
 
   async function handleUpload(event: any) {
     event.preventDefault();
+    if (loading) return;
+    else if (images.length < 1) return;
     setLoading(true);
 
     const address = "http://localhost:5555/predict";
@@ -201,29 +307,34 @@ export function App() {
         }) => (
           // write your building UI
           <ImageWrapper className="upload__image-wrapper">
-            <button
-              style={isDragging ? { color: "red" } : undefined}
-              onClick={onImageUpload}
-              {...dragProps}
-            >
+            <AddButton onClick={onImageUpload} {...dragProps}>
               Click or Drop here
-            </button>
-            &nbsp;
-            <button onClick={onImageRemoveAll}>Remove all images</button>
-            {imageList.map((image, index) => (
-              <div key={index} className="image-item">
-                <img src={image.dataURL} alt="" width="100" />
-                <div className="image-item__btn-wrapper">
-                  <button onClick={() => onImageUpdate(index)}>Update</button>
-                  <button onClick={() => onImageRemove(index)}>Remove</button>
-                </div>
-              </div>
-            ))}
+            </AddButton>
+            <RemoveAllButton onClick={onImageRemoveAll}>
+              Remove all images
+            </RemoveAllButton>
+            <AddedImages>
+              {imageList.map((image, index) => (
+                <AddedImage key={index} className="image-item">
+                  <AddedImageThumb
+                    onClick={() => onImageUpdate(index)}
+                    src={image.dataURL}
+                    alt=""
+                  />
+                  <RemoveButton
+                    onClick={() => onImageRemove(index)}
+                    icon={faSquareMinus}
+                  />
+                </AddedImage>
+              ))}
+            </AddedImages>
           </ImageWrapper>
         )}
       </ImageUploading>
       <form onSubmit={handleUpload}>
-        <Submit>이미지 제출</Submit>
+        <Submit disabled={images.length < 1 ? true : loading ? true : false}>
+          이미지 제출
+        </Submit>
       </form>
       {loading ? (
         <Loading>제출 중</Loading>
@@ -240,11 +351,11 @@ export function App() {
                   exit="exit"
                   key={visible}
                 >
-                  <div>
+                  <ResultKinds>
                     {data.kind.map((item) => (
                       <ResultKind>{item}</ResultKind>
                     ))}
-                  </div>
+                  </ResultKinds>
                   <ResultImageContent>
                     <ResultImage
                       src={`data:image/png;base64,${data.imageBytes}`}
