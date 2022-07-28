@@ -1,5 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquareMinus } from "@fortawesome/free-regular-svg-icons";
+import {
+  faSquareMinus,
+  faArrowAltCircleLeft,
+  faArrowAltCircleRight,
+} from "@fortawesome/free-regular-svg-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -28,10 +32,10 @@ const AddButton = styled.button`
   border: 1px dashed rgba(0, 0, 0, 1);
   border-radius: 12px;
   box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, 0.1);
-  background-color: #ffcc6eb8;
+  background-color: #fdd07cb8;
   transition: all 0.12s ease-in-out;
   &:hover {
-    background-color: #ffbf48;
+    background-color: #ffbf48dc;
     color: orangered;
     cursor: pointer;
   }
@@ -49,6 +53,9 @@ const RemoveAllButton = styled.button`
     background-color: orangered;
     cursor: pointer;
   }
+  &:active {
+    background-color: red;
+  }
 `;
 
 const AddedImageThumb = styled.img`
@@ -62,13 +69,16 @@ const RemoveButton = styled(FontAwesomeIcon)`
   top: 0px;
   right: 5px;
   border: none;
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  color: #ff5900;
+  color: white;
   transition: color 0.12s ease-in-out;
   &:hover {
     cursor: pointer;
+    color: orange;
+  }
+  &:active {
     color: red;
   }
 `;
@@ -109,6 +119,9 @@ const Submit = styled.button`
   transition: background-color 0.12s ease-in-out;
   margin-bottom: 20px;
   &:hover {
+    background-color: #ff7700;
+  }
+  &:active {
     background-color: orangered;
   }
   &:disabled {
@@ -168,7 +181,18 @@ const ResultButtonContent = styled.div`
   margin-bottom: 40px;
 `;
 
-const ResultButton = styled.button``;
+const ResultControl = styled(FontAwesomeIcon)`
+  font-size: 40px;
+  margin: 0 10px;
+  transition: color 0.12s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    color: orange;
+  }
+  &:active {
+    color: red;
+  }
+`;
 
 interface ImageTypes {
   dataURL: string;
@@ -311,7 +335,7 @@ export function App() {
               Click or Drop here
             </AddButton>
             <RemoveAllButton onClick={onImageRemoveAll}>
-              Remove all images
+              모든 이미지 제거
             </RemoveAllButton>
             <AddedImages>
               {imageList.map((image, index) => (
@@ -367,8 +391,8 @@ export function App() {
             )}
           </AnimatePresence>
           <ResultButtonContent>
-            <ResultButton onClick={getPrev}>이전</ResultButton>
-            <ResultButton onClick={getNext}>다음</ResultButton>
+            <ResultControl onClick={getPrev} icon={faArrowAltCircleLeft} />
+            <ResultControl onClick={getNext} icon={faArrowAltCircleRight} />
           </ResultButtonContent>
         </ResultWrapper>
       ) : (
