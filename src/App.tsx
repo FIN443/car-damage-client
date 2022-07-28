@@ -9,6 +9,7 @@ import { useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import styled from "styled-components";
 import "./styles.css";
+import { Helmet } from "react-helmet";
 
 const AppWrapper = styled.div`
   display: flex;
@@ -135,13 +136,13 @@ const ResultWrapper = styled.div`
   justify-content: center;
   margin: 10px 0px;
   position: relative;
-  min-height: 600px;
+  min-height: 700px;
 `;
 
 const ResultContent = styled(motion.div)`
   display: flex;
   position: absolute;
-  top: 60px;
+  top: 80px;
   flex-direction: column;
   margin-bottom: 10px;
 `;
@@ -311,94 +312,98 @@ export function App() {
         setLoading(false);
       });
   }
-
   return (
-    <AppWrapper className="App">
-      <ImageUploading
-        multiple
-        value={images}
-        onChange={onChange}
-        maxNumber={maxNumber}
-      >
-        {({
-          imageList,
-          onImageUpload,
-          onImageRemoveAll,
-          onImageUpdate,
-          onImageRemove,
-          isDragging,
-          dragProps,
-        }) => (
-          // write your building UI
-          <ImageWrapper className="upload__image-wrapper">
-            <AddButton onClick={onImageUpload} {...dragProps}>
-              Click or Drop here
-            </AddButton>
-            <RemoveAllButton onClick={onImageRemoveAll}>
-              모든 이미지 제거
-            </RemoveAllButton>
-            <AddedImages>
-              {imageList.map((image, index) => (
-                <AddedImage key={index} className="image-item">
-                  <AddedImageThumb
-                    onClick={() => onImageUpdate(index)}
-                    src={image.dataURL}
-                    alt=""
-                  />
-                  <RemoveButton
-                    onClick={() => onImageRemove(index)}
-                    icon={faSquareMinus}
-                  />
-                </AddedImage>
-              ))}
-            </AddedImages>
-          </ImageWrapper>
-        )}
-      </ImageUploading>
-      <form onSubmit={handleUpload}>
-        <Submit disabled={images.length < 1 ? true : loading ? true : false}>
-          이미지 제출
-        </Submit>
-      </form>
-      {loading ? (
-        <Loading>제출 중</Loading>
-      ) : predImages?.length > 0 ? (
-        <ResultWrapper>
-          <AnimatePresence custom={back}>
-            {predImages.map((data, idx) =>
-              idx + 1 === visible ? (
-                <ResultContent
-                  custom={back}
-                  variants={boxVariant}
-                  initial="entry"
-                  animate="center"
-                  exit="exit"
-                  key={visible}
-                >
-                  <ResultKinds>
-                    {data.kind.map((item) => (
-                      <ResultKind>{item}</ResultKind>
-                    ))}
-                  </ResultKinds>
-                  <ResultImageContent>
-                    <ResultImage
-                      src={`data:image/png;base64,${data.imageBytes}`}
-                      alt="pred"
+    <>
+      <Helmet>
+        <title>차량 파손 탐지</title>
+      </Helmet>
+      <AppWrapper className="App">
+        <ImageUploading
+          multiple
+          value={images}
+          onChange={onChange}
+          maxNumber={maxNumber}
+        >
+          {({
+            imageList,
+            onImageUpload,
+            onImageRemoveAll,
+            onImageUpdate,
+            onImageRemove,
+            isDragging,
+            dragProps,
+          }) => (
+            // write your building UI
+            <ImageWrapper className="upload__image-wrapper">
+              <AddButton onClick={onImageUpload} {...dragProps}>
+                Click or Drop here
+              </AddButton>
+              <RemoveAllButton onClick={onImageRemoveAll}>
+                모든 이미지 제거
+              </RemoveAllButton>
+              <AddedImages>
+                {imageList.map((image, index) => (
+                  <AddedImage key={index} className="image-item">
+                    <AddedImageThumb
+                      onClick={() => onImageUpdate(index)}
+                      src={image.dataURL}
+                      alt=""
                     />
-                  </ResultImageContent>
-                </ResultContent>
-              ) : null
-            )}
-          </AnimatePresence>
-          <ResultButtonContent>
-            <ResultControl onClick={getPrev} icon={faArrowAltCircleLeft} />
-            <ResultControl onClick={getNext} icon={faArrowAltCircleRight} />
-          </ResultButtonContent>
-        </ResultWrapper>
-      ) : (
-        <></>
-      )}
-    </AppWrapper>
+                    <RemoveButton
+                      onClick={() => onImageRemove(index)}
+                      icon={faSquareMinus}
+                    />
+                  </AddedImage>
+                ))}
+              </AddedImages>
+            </ImageWrapper>
+          )}
+        </ImageUploading>
+        <form onSubmit={handleUpload}>
+          <Submit disabled={images.length < 1 ? true : loading ? true : false}>
+            이미지 제출
+          </Submit>
+        </form>
+        {loading ? (
+          <Loading>제출 중</Loading>
+        ) : predImages?.length > 0 ? (
+          <ResultWrapper>
+            <AnimatePresence custom={back}>
+              {predImages.map((data, idx) =>
+                idx + 1 === visible ? (
+                  <ResultContent
+                    custom={back}
+                    variants={boxVariant}
+                    initial="entry"
+                    animate="center"
+                    exit="exit"
+                    key={visible}
+                  >
+                    <ResultKinds>
+                      {data.kind.map((item) => (
+                        <ResultKind>{item}</ResultKind>
+                      ))}
+                    </ResultKinds>
+                    <ResultImageContent>
+                      <ResultImage
+                        src={`data:image/png;base64,${data.imageBytes}`}
+                        alt="pred"
+                      />
+                    </ResultImageContent>
+                  </ResultContent>
+                ) : null
+              )}
+            </AnimatePresence>
+            <ResultButtonContent>
+              <ResultControl onClick={getPrev} icon={faArrowAltCircleLeft} />
+              <ResultControl onClick={getNext} icon={faArrowAltCircleRight} />
+            </ResultButtonContent>
+          </ResultWrapper>
+        ) : (
+          <></>
+        )}
+      </AppWrapper>
+    </>
   );
 }
 
