@@ -296,7 +296,7 @@ export function App() {
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
   const [visible, setVisible] = useState<number>(1);
   const [back, setBack] = useState<boolean>(false);
-  const [text, setText] = useState("http://localhost:5555/predict");
+  const [text, setText] = useState("");
   const [address, setAddress] = useState("");
   const maxNumber = 8;
 
@@ -349,6 +349,10 @@ export function App() {
 
     fetch(address, {
       method: "POST",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.141 Whale/3.15.136.29 Safari/537.36",
+      },
       body: data,
     })
       .then((res) => {
@@ -358,7 +362,7 @@ export function App() {
         throw new Error("Network response was not ok.");
       })
       .then((data: ResponseTypes) => {
-        // console.log(data);
+        console.log(data);
         setPredImages(data.data);
         setVisible(1);
         setLoading(false);
@@ -379,7 +383,7 @@ export function App() {
             onChange={onChangeText}
             value={text}
             type="text"
-            placeholder="모델 서버 주소"
+            placeholder="모델 서버 주소 (ex: http://0227-35-231-130-113.ngrok.io/predict)"
           />
           <AddressApply>적용</AddressApply>
           <ApplyStatus
