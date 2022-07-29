@@ -296,7 +296,9 @@ export function App() {
   const [predImages, setPredImages] = useState<PredImageTypes>([]);
   const [visible, setVisible] = useState<number>(1);
   const [back, setBack] = useState<boolean>(false);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(
+    "https://모델서버-주소을-넣어주세요/predict"
+  );
   const [address, setAddress] = useState("");
   const maxNumber = 8;
 
@@ -383,7 +385,7 @@ export function App() {
             onChange={onChangeText}
             value={text}
             type="text"
-            placeholder="모델 서버 주소 (ex: http://0227-35-231-130-113.ngrok.io/predict)"
+            placeholder="모델 서버 주소 (ex: https://0227-35-231-130-113.ngrok.io/predict)"
           />
           <AddressApply>적용</AddressApply>
           <ApplyStatus
