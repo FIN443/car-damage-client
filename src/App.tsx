@@ -326,7 +326,8 @@ export function App() {
 
   function handleAddress(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setAddress(text);
+    const pathname = text.split("://");
+    setAddress(`https://${pathname[pathname.length - 1]}`);
     console.log(address);
   }
 
